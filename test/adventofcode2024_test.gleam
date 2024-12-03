@@ -1,4 +1,5 @@
 import day01
+import day02
 import gleam/int
 import gleam/list
 import gleam/string
@@ -24,6 +25,25 @@ fn read_day01_input() -> List(List(Int)) {
           }
         })
       })
+    Error(_) -> []
+  }
+}
+
+fn read_day02_input() -> List(List(Int)) {
+  case simplifile.read("input/day02/input") {
+    Ok(file) -> {
+      string.trim(file)
+      |> string.split("\n")
+      |> list.map(fn(line) {
+        string.split(line, " ")
+        |> list.map(fn(item) {
+          case int.parse(item) {
+            Ok(val) -> val
+            Error(_) -> 0
+          }
+        })
+      })
+    }
     Error(_) -> []
   }
 }
@@ -62,4 +82,25 @@ pub fn day01_similarity_test() {
 
   day01.calculate_similarity_score(read_day01_input())
   |> should.equal(22_962_826)
+}
+
+pub fn day02_report_test() {
+  day02.validate_report([7, 6, 4, 2, 1]) |> should.equal(True)
+  day02.validate_report([1, 2, 7, 8, 9]) |> should.equal(False)
+  day02.validate_report([9, 7, 6, 2, 1]) |> should.equal(False)
+  day02.validate_report([1, 3, 2, 4, 5]) |> should.equal(False)
+  day02.validate_report([8, 6, 4, 4, 1]) |> should.equal(False)
+  day02.validate_report([1, 3, 6, 7, 9]) |> should.equal(True)
+}
+
+pub fn day02_reports_input_test() {
+  read_day02_input()
+  |> list.map(day02.validate_report)
+  |> list.fold(0, fn(acc, is_safe) {
+    case is_safe {
+      True -> acc + 1
+      False -> acc
+    }
+  })
+  |> should.equal(334)
 }
