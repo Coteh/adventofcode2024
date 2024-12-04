@@ -84,7 +84,7 @@ pub fn day01_similarity_test() {
   |> should.equal(22_962_826)
 }
 
-pub fn day02_report_test() {
+pub fn day02_report_part1_test() {
   day02.validate_report([7, 6, 4, 2, 1]) |> should.equal(True)
   day02.validate_report([1, 2, 7, 8, 9]) |> should.equal(False)
   day02.validate_report([9, 7, 6, 2, 1]) |> should.equal(False)
@@ -93,7 +93,54 @@ pub fn day02_report_test() {
   day02.validate_report([1, 3, 6, 7, 9]) |> should.equal(True)
 }
 
-pub fn day02_reports_input_test() {
+pub fn day02_report_part2_test() {
+  // sample cases
+  day02.validate_report_with_dampener([7, 6, 4, 2, 1]) |> should.equal(True)
+  day02.validate_report_with_dampener([1, 2, 7, 8, 9]) |> should.equal(False)
+  day02.validate_report_with_dampener([9, 7, 6, 2, 1]) |> should.equal(False)
+  day02.validate_report_with_dampener([1, 3, 2, 4, 5]) |> should.equal(True)
+  day02.validate_report_with_dampener([8, 6, 4, 4, 1]) |> should.equal(True)
+  day02.validate_report_with_dampener([1, 3, 6, 7, 9]) |> should.equal(True)
+
+  // empty case
+  day02.validate_report_with_dampener([]) |> should.equal(True)
+  // single value case
+  day02.validate_report_with_dampener([1]) |> should.equal(True)
+  // right side case (remove decrease)
+  day02.validate_report_with_dampener([1, 2, 3, 4, 3]) |> should.equal(True)
+  // right side case (remove steep decrease)
+  day02.validate_report_with_dampener([3, 4, 5, 6, 1]) |> should.equal(True)
+  // left side case (remove decrease)
+  day02.validate_report_with_dampener([3, 1, 2, 3, 4]) |> should.equal(True)
+  // left side case (remove steep decrease)
+  day02.validate_report_with_dampener([9, 1, 2, 3, 4]) |> should.equal(True)
+  // right side case (remove increase)
+  day02.validate_report_with_dampener([4, 3, 2, 1, 2]) |> should.equal(True)
+  // right side case (remove steep increase)
+  day02.validate_report_with_dampener([4, 3, 2, 1, 9]) |> should.equal(True)
+  // left side case (remove increase)
+  day02.validate_report_with_dampener([8, 9, 8, 7, 6]) |> should.equal(True)
+  // left side case (remove steep increase)
+  day02.validate_report_with_dampener([1, 9, 8, 7, 6]) |> should.equal(True)
+  // left side case (remove same value)
+  day02.validate_report_with_dampener([1, 1, 2, 3, 4]) |> should.equal(True)
+  // right side case (remove same value)
+  day02.validate_report_with_dampener([1, 2, 3, 4, 4]) |> should.equal(True)
+  // cannot recover case
+  day02.validate_report_with_dampener([1, 3, 7, 8, 9]) |> should.equal(False)
+  // middle case (remove same value)
+  day02.validate_report_with_dampener([1, 2, 2, 3, 4]) |> should.equal(True)
+  // middle case (remove steep increase/decrease)
+  day02.validate_report_with_dampener([1, 2, 7, 3, 4]) |> should.equal(True)
+  // middle case (remove steep decrease/increase)
+  day02.validate_report_with_dampener([9, 8, 1, 7, 6]) |> should.equal(True)
+  // middle case (remove decrease)
+  day02.validate_report_with_dampener([1, 2, 5, 3, 4]) |> should.equal(True)
+  // middle case (remove increase)
+  day02.validate_report_with_dampener([4, 3, 4, 2, 1]) |> should.equal(True)
+}
+
+pub fn day02_reports_input_part1_test() {
   read_day02_input()
   |> list.map(day02.validate_report)
   |> list.fold(0, fn(acc, is_safe) {
@@ -103,4 +150,16 @@ pub fn day02_reports_input_test() {
     }
   })
   |> should.equal(334)
+}
+
+pub fn day02_reports_input_part2_test() {
+  read_day02_input()
+  |> list.map(day02.validate_report_with_dampener)
+  |> list.fold(0, fn(acc, is_safe) {
+    case is_safe {
+      True -> acc + 1
+      False -> acc
+    }
+  })
+  |> should.equal(400)
 }

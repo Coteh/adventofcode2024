@@ -48,6 +48,22 @@ pub fn validate_report(report: List(Int)) -> Bool {
   }
 }
 
+// brute forced it :)
+pub fn validate_report_with_dampener(report: List(Int)) -> Bool {
+  case report {
+    [_, ..] -> {
+      let list_copy = list.append(report, [])
+      let index_list = list.index_map(list_copy, fn(_, i) { i })
+      list.any(index_list, fn(i) {
+        let list_before = list.take(list_copy, i)
+        let list_after = list.drop(list_copy, i + 1)
+        validate_report(list.append(list_before, list_after))
+      })
+    }
+    [] -> True
+  }
+}
+
 pub fn main() {
   let reports =
     read_lines([])
@@ -66,6 +82,17 @@ pub fn main() {
   io.debug(
     reports
     |> list.map(validate_report)
+    |> list.fold(0, fn(acc, is_safe) {
+      case is_safe {
+        True -> acc + 1
+        False -> acc
+      }
+    }),
+  )
+
+  io.debug(
+    reports
+    |> list.map(validate_report_with_dampener)
     |> list.fold(0, fn(acc, is_safe) {
       case is_safe {
         True -> acc + 1
