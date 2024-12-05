@@ -1,5 +1,6 @@
 import day01
 import day02
+import day03
 import gleam/int
 import gleam/list
 import gleam/string
@@ -43,6 +44,16 @@ fn read_day02_input() -> List(List(Int)) {
           }
         })
       })
+    }
+    Error(_) -> []
+  }
+}
+
+fn read_day03_input() -> List(String) {
+  case simplifile.read("input/day03/input") {
+    Ok(file) -> {
+      string.trim(file)
+      |> string.split("\n")
     }
     Error(_) -> []
   }
@@ -162,4 +173,101 @@ pub fn day02_reports_input_part2_test() {
     }
   })
   |> should.equal(400)
+}
+
+pub fn day03_part1_mul_single_test() {
+  day03.process_line("mul(3,9)")
+  |> should.equal(27)
+}
+
+pub fn day03_part1_mul_double_test() {
+  day03.process_line("mul(3,9)mul(2,2)")
+  |> should.equal(31)
+}
+
+pub fn day03_part1_mul_garbage_before_test() {
+  day03.process_line("dsfdsfdsmul(3,9)")
+  |> should.equal(27)
+}
+
+pub fn day03_part1_mul_garbage_after_test() {
+  day03.process_line("mul(3,9)dsfdsfsd")
+  |> should.equal(27)
+}
+
+pub fn day03_part1_mul_garbage_before_params_test() {
+  day03.process_line("mul(dsfdsf3,9)")
+  |> should.equal(0)
+}
+
+pub fn day03_part1_mul_garbage_between_params_test() {
+  day03.process_line("mul(3,dsfdsf9)")
+  |> should.equal(0)
+}
+
+pub fn day03_part1_mul_garbage_after_params_test() {
+  day03.process_line("mul(3,9dsfdsf)")
+  |> should.equal(0)
+}
+
+pub fn day03_part1_mul_nested_test() {
+  day03.process_line("mul(3,mul(8,3))")
+  |> should.equal(24)
+}
+
+pub fn day03_part1_mul_single_param_test() {
+  day03.process_line("mul(3)")
+  |> should.equal(0)
+}
+
+pub fn day03_part1_mul_no_param_test() {
+  day03.process_line("mul()")
+  |> should.equal(0)
+}
+
+pub fn day03_part1_mul_typo_test() {
+  day03.process_line("mlu(3,9)")
+  |> should.equal(0)
+}
+
+pub fn day03_part1_mul_sample_test() {
+  day03.process_line(
+    "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))",
+  )
+  |> should.equal(161)
+}
+
+pub fn day03_part1_mul_sample_garbage_1_test() {
+  day03.process_line("mul(4*")
+  |> should.equal(0)
+}
+
+pub fn day03_part1_mul_sample_garbage_2_test() {
+  day03.process_line("mul(6,9!")
+  |> should.equal(0)
+}
+
+pub fn day03_part1_mul_sample_garbage_3_test() {
+  day03.process_line("?(12,34)")
+  |> should.equal(0)
+}
+
+pub fn day03_part1_mul_sample_garbage_4_test() {
+  day03.process_line("mul ( 2 , 4 )")
+  |> should.equal(0)
+}
+
+pub fn day03_part1_mul_input_part1_test() {
+  let result =
+    read_day03_input()
+    // |> io.debug
+    |> list.map(day03.process_line)
+    // |> io.debug
+    |> list.reduce(fn(acc, x) { acc + x })
+
+  case result {
+    Ok(val) -> val
+    Error(_) -> 0
+  }
+  |> should.equal(169_021_493)
 }
