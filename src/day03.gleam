@@ -9,6 +9,11 @@ pub type ReadState {
   Param(index: Int)
 }
 
+pub type MulState {
+  Enabled
+  Disabled
+}
+
 fn read_lines(acc: List(String)) -> List(String) {
   case erlang.get_line("") {
     Ok(line) -> {
@@ -19,75 +24,102 @@ fn read_lines(acc: List(String)) -> List(String) {
   }
 }
 
-pub fn process_line(line: String) -> Int {
+fn process_line(
+  line: String,
+  mul_enabled: MulState,
+  use_conditionals: Bool,
+) -> #(Int, MulState) {
   let characters = string.split(line, "")
   let result =
-    list.fold(characters, #("", Initial, 0), fn(tup, chr) {
+    list.fold(characters, #("", Initial, 0, mul_enabled, ""), fn(tup, chr) {
       let acc = tup.0
       let curr_read_state = tup.1
       let x = tup.2
+      let mul_state = tup.3
+      let command = tup.4
 
-      // io.debug("acc")
-      // io.debug(acc)
       case chr {
         "m" -> {
           case curr_read_state {
-            Initial -> #(acc <> chr, Initial, x)
-            Param(_) -> #("m", Initial, x)
+            Initial -> #(acc <> chr, Initial, x, mul_state, "")
+            Param(_) -> #("m", Initial, x, mul_state, "")
           }
         }
         "u" -> {
           case curr_read_state {
             Initial -> {
               case acc {
-                "m" -> #(acc <> chr, Initial, x)
-                _ -> #("", Initial, x)
+                "m" -> #(acc <> chr, Initial, x, mul_state, "")
+                _ -> #("", Initial, x, mul_state, "")
               }
             }
-            Param(_) -> #("", Initial, x)
+            Param(_) -> #("", Initial, x, mul_state, "")
           }
         }
         "l" -> {
           case curr_read_state {
             Initial -> {
               case acc {
-                "mu" -> #(acc <> chr, Initial, x)
-                _ -> #("", Initial, x)
+                "mu" -> #(acc <> chr, Initial, x, mul_state, "")
+                _ -> #("", Initial, x, mul_state, "")
               }
             }
-            Param(_) -> #("", Initial, x)
+            Param(_) -> #("", Initial, x, mul_state, "")
           }
         }
         "(" -> {
           case curr_read_state {
             Initial -> {
               case acc {
-                "mul" -> #("", Param(1), x)
-                _ -> #("", Initial, x)
+                "mul" -> #("", Param(1), x, mul_state, "mul")
+                "do" -> #("", Param(1), x, mul_state, "do")
+                "don't" -> #("", Param(1), x, mul_state, "don't")
+                _ -> #("", Initial, x, mul_state, "")
               }
             }
-            Param(_) -> #("", Initial, x)
+            Param(_) -> #("", Initial, x, mul_state, "")
           }
         }
         ")" -> {
           case curr_read_state {
-            Initial -> #("", Initial, x)
+            Initial -> #("", Initial, x, mul_state, "")
             Param(index) -> {
               case index {
-                1 -> #("", Initial, x)
-                _ -> {
-                  let split_nums =
-                    string.split(acc, ",")
-                    |> list.map(int.parse)
-                    |> list.map(fn(num_str) {
-                      case num_str {
-                        Ok(val) -> val
-                        Error(_) -> 0
+                1 -> {
+                  case command {
+                    "do" -> #("", Initial, x, Enabled, "")
+                    "don't" -> {
+                      case use_conditionals {
+                        True -> #("", Initial, x, Disabled, "")
+                        False -> #("", Initial, x, mul_state, "")
                       }
-                    })
-                  case list.reduce(split_nums, fn(acc, y) { y * acc }) {
-                    Ok(val) -> #("", Initial, x + val)
-                    Error(Nil) -> #("", Initial, x)
+                    }
+                    _ -> #("", Initial, x, mul_state, "")
+                  }
+                }
+                _ -> {
+                  case command {
+                    "mul" -> {
+                      case mul_state {
+                        Enabled -> {
+                          let split_nums =
+                            string.split(acc, ",")
+                            |> list.map(int.parse)
+                            |> list.map(fn(num_str) {
+                              case num_str {
+                                Ok(val) -> val
+                                Error(_) -> 0
+                              }
+                            })
+                          case list.reduce(split_nums, fn(acc, y) { y * acc }) {
+                            Ok(val) -> #("", Initial, x + val, mul_state, "")
+                            Error(Nil) -> #("", Initial, x, mul_state, "")
+                          }
+                        }
+                        Disabled -> #("", Initial, x, Disabled, "")
+                      }
+                    }
+                    _ -> #("", Initial, x, mul_state, "")
                   }
                 }
               }
@@ -96,20 +128,87 @@ pub fn process_line(line: String) -> Int {
         }
         "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" -> {
           case curr_read_state {
-            Initial -> #("", Initial, x)
-            Param(_) -> #(acc <> chr, curr_read_state, x)
+            Initial -> #("", Initial, x, mul_state, "")
+            Param(_) -> {
+              case command {
+                "mul" -> #(acc <> chr, curr_read_state, x, mul_state, command)
+                _ -> #("", Initial, x, mul_state, "")
+              }
+            }
           }
         }
         "," -> {
           case curr_read_state {
-            Initial -> #("", Initial, x)
-            Param(i) -> #(acc <> chr, Param(i + 1), x)
+            Initial -> #("", Initial, x, mul_state, "")
+            Param(i) -> #(acc <> chr, Param(i + 1), x, mul_state, command)
           }
         }
-        _ -> #("", Initial, x)
+        "d" -> {
+          case curr_read_state {
+            Initial -> #(acc <> chr, Initial, x, mul_state, "")
+            Param(_) -> #("d", Initial, x, mul_state, "")
+          }
+        }
+        "o" -> {
+          case curr_read_state {
+            Initial -> {
+              case acc {
+                "d" -> #(acc <> chr, Initial, x, mul_state, "")
+                _ -> #("", Initial, x, mul_state, "")
+              }
+            }
+            Param(_) -> #("", Initial, x, mul_state, "")
+          }
+        }
+        "n" -> {
+          case curr_read_state {
+            Initial -> {
+              case acc {
+                "do" -> #(acc <> chr, Initial, x, mul_state, "")
+                _ -> #("", Initial, x, mul_state, "")
+              }
+            }
+            Param(_) -> #("", Initial, x, mul_state, "")
+          }
+        }
+        "'" -> {
+          case curr_read_state {
+            Initial -> {
+              case acc {
+                "don" -> #(acc <> chr, Initial, x, mul_state, "")
+                _ -> #("", Initial, x, mul_state, "")
+              }
+            }
+            Param(_) -> #("", Initial, x, mul_state, "")
+          }
+        }
+        "t" -> {
+          case curr_read_state {
+            Initial -> {
+              case acc {
+                "don'" -> #(acc <> chr, Initial, x, mul_state, "")
+                _ -> #("", Initial, x, mul_state, "")
+              }
+            }
+            Param(_) -> #("", Initial, x, mul_state, "")
+          }
+        }
+        _ -> #("", Initial, x, mul_state, "")
       }
     })
-  result.2
+  #(result.2, result.3)
+}
+
+pub fn process_lines(lines: List(String), use_conditionals: Bool) -> Int {
+  let result =
+    lines
+    |> list.fold(#(0, Enabled), fn(acc, line) {
+      let result = process_line(line, acc.1, use_conditionals)
+
+      #(acc.0 + result.0, result.1)
+    })
+
+  result.0
 }
 
 pub fn main() {
@@ -117,13 +216,11 @@ pub fn main() {
 
   lines
   // |> io.debug
-  |> list.map(process_line)
-  |> list.reduce(fn(acc, x) { acc + x })
-  |> fn(x) {
-    case x {
-      Ok(val) -> val
-      Error(_) -> 0
-    }
-  }
+  |> process_lines(False)
+  |> io.debug
+
+  lines
+  // |> io.debug
+  |> process_lines(True)
   |> io.debug
 }

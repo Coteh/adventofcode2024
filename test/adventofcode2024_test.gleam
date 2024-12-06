@@ -175,99 +175,182 @@ pub fn day02_reports_input_part2_test() {
   |> should.equal(400)
 }
 
-pub fn day03_part1_mul_single_test() {
-  day03.process_line("mul(3,9)")
+pub fn day03_mul_single_test() {
+  day03.process_lines(["mul(3,9)"], True)
   |> should.equal(27)
 }
 
-pub fn day03_part1_mul_double_test() {
-  day03.process_line("mul(3,9)mul(2,2)")
+pub fn day03_mul_double_test() {
+  day03.process_lines(["mul(3,9)mul(2,2)"], True)
   |> should.equal(31)
 }
 
-pub fn day03_part1_mul_garbage_before_test() {
-  day03.process_line("dsfdsfdsmul(3,9)")
+pub fn day03_mul_garbage_before_test() {
+  day03.process_lines(["dsfdsfdsmul(3,9)"], True)
   |> should.equal(27)
 }
 
-pub fn day03_part1_mul_garbage_after_test() {
-  day03.process_line("mul(3,9)dsfdsfsd")
+pub fn day03_mul_garbage_after_test() {
+  day03.process_lines(["mul(3,9)dsfdsfsd"], True)
   |> should.equal(27)
 }
 
-pub fn day03_part1_mul_garbage_before_params_test() {
-  day03.process_line("mul(dsfdsf3,9)")
+pub fn day03_mul_garbage_before_params_test() {
+  day03.process_lines(["mul(dsfdsf3,9)"], True)
   |> should.equal(0)
 }
 
-pub fn day03_part1_mul_garbage_between_params_test() {
-  day03.process_line("mul(3,dsfdsf9)")
+pub fn day03_mul_garbage_between_params_test() {
+  day03.process_lines(["mul(3,dsfdsf9)"], True)
   |> should.equal(0)
 }
 
-pub fn day03_part1_mul_garbage_after_params_test() {
-  day03.process_line("mul(3,9dsfdsf)")
+pub fn day03_mul_garbage_after_params_test() {
+  day03.process_lines(["mul(3,9dsfdsf)"], True)
   |> should.equal(0)
 }
 
-pub fn day03_part1_mul_nested_test() {
-  day03.process_line("mul(3,mul(8,3))")
+pub fn day03_mul_nested_test() {
+  day03.process_lines(["mul(3,mul(8,3))"], True)
   |> should.equal(24)
 }
 
-pub fn day03_part1_mul_single_param_test() {
-  day03.process_line("mul(3)")
+pub fn day03_mul_single_param_test() {
+  day03.process_lines(["mul(3)"], True)
   |> should.equal(0)
 }
 
-pub fn day03_part1_mul_no_param_test() {
-  day03.process_line("mul()")
+pub fn day03_mul_no_param_test() {
+  day03.process_lines(["mul()"], True)
   |> should.equal(0)
 }
 
-pub fn day03_part1_mul_typo_test() {
-  day03.process_line("mlu(3,9)")
+pub fn day03_mul_typo_test() {
+  day03.process_lines(["mlu(3,9)"], True)
   |> should.equal(0)
 }
 
-pub fn day03_part1_mul_sample_test() {
-  day03.process_line(
-    "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))",
+pub fn day03_mul_sample_part1_test() {
+  day03.process_lines(
+    ["xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))"],
+    False,
   )
   |> should.equal(161)
 }
 
-pub fn day03_part1_mul_sample_garbage_1_test() {
-  day03.process_line("mul(4*")
+pub fn day03_mul_sample_garbage_1_test() {
+  day03.process_lines(["mul(4*"], True)
   |> should.equal(0)
 }
 
-pub fn day03_part1_mul_sample_garbage_2_test() {
-  day03.process_line("mul(6,9!")
+pub fn day03_mul_sample_garbage_2_test() {
+  day03.process_lines(["mul(6,9!"], True)
   |> should.equal(0)
 }
 
-pub fn day03_part1_mul_sample_garbage_3_test() {
-  day03.process_line("?(12,34)")
+pub fn day03_mul_sample_garbage_3_test() {
+  day03.process_lines(["?(12,34)"], True)
   |> should.equal(0)
 }
 
-pub fn day03_part1_mul_sample_garbage_4_test() {
-  day03.process_line("mul ( 2 , 4 )")
+pub fn day03_mul_sample_garbage_4_test() {
+  day03.process_lines(["mul ( 2 , 4 )"], True)
   |> should.equal(0)
+}
+
+pub fn day03_dont_test() {
+  day03.process_lines(["mul(1,1)don't()mul(1,1)"], True)
+  |> should.equal(1)
+}
+
+pub fn day03_dont_no_conditionals_test() {
+  day03.process_lines(["mul(1,1)don't()mul(1,1)"], False)
+  |> should.equal(2)
+}
+
+pub fn day03_do_test() {
+  day03.process_lines(["mul(1,1)don't()do()mul(1,1)"], True)
+  |> should.equal(2)
+}
+
+pub fn day03_do_no_conditionals_test() {
+  day03.process_lines(["mul(1,1)don't()do()mul(1,1)"], False)
+  |> should.equal(2)
+}
+
+pub fn day03_double_dont_test() {
+  day03.process_lines(["mul(1,1)don't()don't()mul(1,1)"], True)
+  |> should.equal(1)
+}
+
+pub fn day03_double_do_test() {
+  day03.process_lines(["mul(1,1)do()do()mul(1,1)"], True)
+  |> should.equal(2)
+}
+
+pub fn day03_do_then_dont_test() {
+  day03.process_lines(["mul(1,1)do()don't()mul(1,1)"], True)
+  |> should.equal(1)
+}
+
+pub fn day03_dont_garbage_before_param_test() {
+  day03.process_lines(["mul(1,1)don'tdsfds()mul(1,1)"], True)
+  |> should.equal(2)
+}
+
+pub fn day03_dont_garbage_in_param_test() {
+  day03.process_lines(["mul(1,1)don't(dsfds)mul(1,1)"], True)
+  |> should.equal(2)
+}
+
+pub fn day03_dont_garbage_after_param_test() {
+  day03.process_lines(["mul(1,1)don't()dsfdsmul(1,1)"], True)
+  |> should.equal(1)
+}
+
+pub fn day03_dont_typo_test() {
+  day03.process_lines(["mul(1,1)dodsfdsn't()mul(1,1)"], True)
+  |> should.equal(2)
+}
+
+pub fn day03_dont_nested_test() {
+  day03.process_lines(["mul(1,1)don't(don't())mul(1,1)"], True)
+  |> should.equal(1)
+}
+
+pub fn day03_dont_double_parentheses_test() {
+  day03.process_lines(["mul(1,1)don't(()mul(1,1)"], True)
+  |> should.equal(2)
+}
+
+pub fn day03_nested_mul_dont_do_test() {
+  day03.process_lines(
+    ["mul(1,1)mul(don't()2,3mul(4,5))mul(do()2,3mul(1,1))"],
+    True,
+  )
+  |> should.equal(2)
+}
+
+pub fn day03_mul_sample_part2_test() {
+  day03.process_lines(
+    [
+      "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))",
+    ],
+    True,
+  )
+  |> should.equal(48)
 }
 
 pub fn day03_part1_mul_input_part1_test() {
-  let result =
-    read_day03_input()
-    // |> io.debug
-    |> list.map(day03.process_line)
-    // |> io.debug
-    |> list.reduce(fn(acc, x) { acc + x })
-
-  case result {
-    Ok(val) -> val
-    Error(_) -> 0
-  }
+  read_day03_input()
+  // |> io.debug
+  |> day03.process_lines(False)
   |> should.equal(169_021_493)
+}
+
+pub fn day03_part1_mul_input_part2_test() {
+  read_day03_input()
+  // |> io.debug
+  |> day03.process_lines(True)
+  |> should.equal(111_762_583)
 }
