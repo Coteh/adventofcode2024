@@ -1,8 +1,11 @@
 import day01
 import day02
 import day03
+import day05
 import gleam/int
+import gleam/io
 import gleam/list
+import gleam/result
 import gleam/string
 import gleeunit
 import gleeunit/should
@@ -57,6 +60,26 @@ fn read_day03_input() -> List(String) {
     }
     Error(_) -> []
   }
+}
+
+fn read_day05_input() -> #(List(#(Int, Int)), List(List(Int))) {
+  let unprocessed_lines = case simplifile.read("input/day05/input") {
+    Ok(file) -> {
+      string.trim(file)
+      |> string.split("\n")
+      |> list.split_while(fn(line) { line != "" })
+    }
+    Error(_) -> #([], [])
+  }
+
+  let processed_rules = list.map(unprocessed_lines.0, day05.process_rule)
+  let processed_inputs =
+    list.map(
+      unprocessed_lines.1 |> list.rest() |> result.unwrap([]),
+      day05.process_inputs,
+    )
+
+  #(processed_rules, processed_inputs)
 }
 
 pub fn day01_distance_test() {
@@ -353,4 +376,72 @@ pub fn day03_part1_mul_input_part2_test() {
   // |> io.debug
   |> day03.process_lines(True)
   |> should.equal(111_762_583)
+}
+
+pub fn day05_part1_sample_test() {
+  let #(rules, lines) = #(
+    [
+      #(47, 53),
+      #(97, 13),
+      #(97, 61),
+      #(97, 47),
+      #(75, 29),
+      #(61, 13),
+      #(75, 53),
+      #(29, 13),
+      #(97, 29),
+      #(53, 29),
+      #(61, 53),
+      #(97, 53),
+      #(61, 29),
+      #(47, 13),
+      #(75, 47),
+      #(97, 75),
+      #(47, 61),
+      #(75, 61),
+      #(47, 29),
+      #(75, 13),
+      #(53, 13),
+    ],
+    [
+      [75, 47, 61, 53, 29],
+      [97, 61, 53, 29, 13],
+      [75, 29, 13],
+      [75, 97, 47, 61, 53],
+      [61, 13, 29],
+      [97, 13, 75, 29, 47],
+    ],
+  )
+
+  lines
+  |> list.filter_map(fn(line) {
+    let valid = day05.evaluate_line(line, rules)
+
+    case valid {
+      True -> Ok(day05.find_middle_page(line))
+      False -> Error(0)
+    }
+  })
+  |> list.reduce(fn(acc, x) { acc + x })
+  |> result.unwrap(0)
+  // |> io.debug
+  |> should.equal(143)
+}
+
+pub fn day05_part1_input_test() {
+  let #(rules, lines) = read_day05_input()
+
+  lines
+  |> list.filter_map(fn(line) {
+    let valid = day05.evaluate_line(line, rules)
+
+    case valid {
+      True -> Ok(day05.find_middle_page(line))
+      False -> Error(0)
+    }
+  })
+  |> list.reduce(fn(acc, x) { acc + x })
+  |> result.unwrap(0)
+  // |> io.debug
+  |> should.equal(5208)
 }
