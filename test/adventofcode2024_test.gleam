@@ -3,7 +3,6 @@ import day02
 import day03
 import day05
 import gleam/int
-import gleam/io
 import gleam/list
 import gleam/result
 import gleam/string
@@ -378,6 +377,51 @@ pub fn day03_part1_mul_input_part2_test() {
   |> should.equal(111_762_583)
 }
 
+pub fn day05_filter_rules_test() {
+  let rules = [
+    #(47, 53),
+    #(97, 13),
+    #(97, 61),
+    #(97, 47),
+    #(75, 29),
+    #(61, 13),
+    #(75, 53),
+    #(29, 13),
+    #(97, 29),
+    #(53, 29),
+    #(61, 53),
+    #(97, 53),
+    #(61, 29),
+    #(47, 13),
+    #(75, 47),
+    #(97, 75),
+    #(47, 61),
+    #(75, 61),
+    #(47, 29),
+    #(75, 13),
+    #(53, 13),
+  ]
+  let line = [75, 29, 13]
+  day05.filter_rules(rules, line)
+  |> should.equal([
+    #(97, 13),
+    #(75, 29),
+    #(61, 13),
+    #(75, 53),
+    #(29, 13),
+    #(97, 29),
+    #(53, 29),
+    #(61, 29),
+    #(47, 13),
+    #(75, 47),
+    #(97, 75),
+    #(75, 61),
+    #(47, 29),
+    #(75, 13),
+    #(53, 13),
+  ])
+}
+
 pub fn day05_part1_sample_test() {
   let #(rules, lines) = #(
     [
@@ -424,8 +468,63 @@ pub fn day05_part1_sample_test() {
   })
   |> list.reduce(fn(acc, x) { acc + x })
   |> result.unwrap(0)
-  // |> io.debug
   |> should.equal(143)
+}
+
+pub fn day05_part2_sample_test() {
+  let #(rules, lines) = #(
+    [
+      #(47, 53),
+      #(97, 13),
+      #(97, 61),
+      #(97, 47),
+      #(75, 29),
+      #(61, 13),
+      #(75, 53),
+      #(29, 13),
+      #(97, 29),
+      #(53, 29),
+      #(61, 53),
+      #(97, 53),
+      #(61, 29),
+      #(47, 13),
+      #(75, 47),
+      #(97, 75),
+      #(47, 61),
+      #(75, 61),
+      #(47, 29),
+      #(75, 13),
+      #(53, 13),
+    ],
+    [
+      [75, 47, 61, 53, 29],
+      [97, 61, 53, 29, 13],
+      [75, 29, 13],
+      [75, 97, 47, 61, 53],
+      [61, 13, 29],
+      [97, 13, 75, 29, 47],
+    ],
+  )
+
+  lines
+  |> list.filter_map(fn(line) {
+    let filtered_rules = day05.filter_rules(rules, line)
+    let valid = day05.evaluate_line(line, rules)
+
+    case valid {
+      True -> Error(0)
+      False -> {
+        Ok(
+          line
+          |> list.sort(fn(a, b) { day05.rule_compare(a, b, filtered_rules) })
+          |> day05.find_middle_page,
+        )
+      }
+    }
+  })
+  |> list.reduce(fn(acc, x) { acc + x })
+  |> result.unwrap(0)
+  |> should.equal(123)
 }
 
 pub fn day05_part1_input_test() {
@@ -442,6 +541,29 @@ pub fn day05_part1_input_test() {
   })
   |> list.reduce(fn(acc, x) { acc + x })
   |> result.unwrap(0)
-  // |> io.debug
   |> should.equal(5208)
+}
+
+pub fn day05_part2_input_test() {
+  let #(rules, lines) = read_day05_input()
+
+  lines
+  |> list.filter_map(fn(line) {
+    let filtered_rules = day05.filter_rules(rules, line)
+    let valid = day05.evaluate_line(line, rules)
+
+    case valid {
+      True -> Error(0)
+      False -> {
+        Ok(
+          line
+          |> list.sort(fn(a, b) { day05.rule_compare(a, b, filtered_rules) })
+          |> day05.find_middle_page,
+        )
+      }
+    }
+  })
+  |> list.reduce(fn(acc, x) { acc + x })
+  |> result.unwrap(0)
+  |> should.equal(6732)
 }

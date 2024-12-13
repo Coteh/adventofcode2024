@@ -2,6 +2,7 @@ import gleam/erlang
 import gleam/int
 import gleam/io
 import gleam/list
+import gleam/order
 import gleam/result
 import gleam/string
 
@@ -101,6 +102,34 @@ pub fn find_middle_page(line: List(Int)) -> Int {
   found.1
 }
 
+pub fn filter_rules(
+  rules: List(#(Int, Int)),
+  line: List(Int),
+) -> List(#(Int, Int)) {
+  rules
+  |> list.filter(fn(rule) {
+    line
+    |> list.any(fn(x) { x == rule.0 || x == rule.1 })
+  })
+}
+
+pub fn rule_compare(a: Int, b: Int, rules: List(#(Int, Int))) -> order.Order {
+  case
+    rules
+    |> list.find(fn(rule) {
+      { rule.0 == a && rule.1 == b } || { rule.0 == b && rule.1 == a }
+    })
+  {
+    Ok(rule) -> {
+      case rule.0 == a && rule.1 == b {
+        True -> order.Lt
+        False -> order.Gt
+      }
+    }
+    Error(_) -> order.Eq
+  }
+}
+
 pub fn main() {
   let #(rules, lines) = read_lines([])
 
@@ -111,6 +140,26 @@ pub fn main() {
     case valid {
       True -> Ok(find_middle_page(line))
       False -> Error(0)
+    }
+  })
+  |> list.reduce(fn(acc, x) { acc + x })
+  |> result.unwrap(0)
+  |> io.debug
+
+  lines
+  |> list.filter_map(fn(line) {
+    let filtered_rules = filter_rules(rules, line)
+    let valid = evaluate_line(line, rules)
+
+    case valid {
+      True -> Error(0)
+      False -> {
+        Ok(
+          line
+          |> list.sort(fn(a, b) { rule_compare(a, b, filtered_rules) })
+          |> find_middle_page,
+        )
+      }
     }
   })
   |> list.reduce(fn(acc, x) { acc + x })
