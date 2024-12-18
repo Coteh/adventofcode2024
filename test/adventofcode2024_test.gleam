@@ -2,6 +2,7 @@ import day01
 import day02
 import day03
 import day05
+import day07
 import gleam/int
 import gleam/list
 import gleam/result
@@ -79,6 +80,26 @@ fn read_day05_input() -> #(List(#(Int, Int)), List(List(Int))) {
     )
 
   #(processed_rules, processed_inputs)
+}
+
+fn read_day07_input() -> List(#(Int, List(Int))) {
+  case simplifile.read("input/day07/input") {
+    Ok(file) -> {
+      string.trim(file)
+      |> string.split("\n")
+      |> list.map(fn(line) { line |> string.split(" ") })
+    }
+    Error(_) -> []
+  }
+  |> list.map(fn(num_strs) {
+    let first = list.first(num_strs) |> result.unwrap("0")
+    let rest = list.rest(num_strs) |> result.unwrap([])
+
+    #(
+      int.parse(first |> string.drop_end(1)) |> result.unwrap(0),
+      list.map(rest, fn(x) { int.parse(x) |> result.unwrap(0) }),
+    )
+  })
 }
 
 pub fn day01_distance_test() {
@@ -566,4 +587,30 @@ pub fn day05_part2_input_test() {
   |> list.reduce(fn(acc, x) { acc + x })
   |> result.unwrap(0)
   |> should.equal(6732)
+}
+
+pub fn day07_part1_sample_test() {
+  [
+    #(190, [10, 19]),
+    #(3267, [81, 40, 27]),
+    #(83, [17, 5]),
+    #(156, [15, 6]),
+    #(7290, [6, 8, 6, 15]),
+    #(161_011, [16, 10, 13]),
+    #(192, [17, 8, 14]),
+    #(21_037, [9, 7, 18, 13]),
+    #(292, [11, 6, 16, 20]),
+  ]
+  |> list.map(day07.determine_correct_operation)
+  |> list.reduce(fn(acc, x) { acc + x })
+  |> result.unwrap(0)
+  |> should.equal(3749)
+}
+
+pub fn day07_part1_input_test() {
+  read_day07_input()
+  |> list.map(day07.determine_correct_operation)
+  |> list.reduce(fn(acc, x) { acc + x })
+  |> result.unwrap(0)
+  |> should.equal(2_664_460_013_123)
 }
