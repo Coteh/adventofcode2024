@@ -1,9 +1,12 @@
 import gleam/erlang
+import gleam/float
 import gleam/int
 import gleam/io
 import gleam/list
 import gleam/result
 import gleam/string
+import gleam_community/maths/conversion
+import gleam_community/maths/elementary
 
 fn read_lines(acc: List(String)) -> List(#(Int, List(Int))) {
   case erlang.get_line("") {
@@ -56,12 +59,18 @@ fn iterate_operation(
             False -> {
               case use_concat {
                 True -> {
-                  let concat_str =
-                    int.to_string(curr_result) <> int.to_string(first)
                   let concat_result =
-                    concat_str
-                    |> int.parse
-                    |> result.unwrap(0)
+                    first
+                    |> int.to_float
+                    |> elementary.logarithm_10
+                    |> result.unwrap(0.0)
+                    |> float.floor
+                    |> float.add(1.0)
+                    |> int.power(10, _)
+                    |> result.unwrap(0.0)
+                    |> float.multiply(curr_result |> int.to_float)
+                    |> conversion.float_to_int
+                    |> int.add(first)
                     |> iterate_operation(expected_result, _, rest, use_concat)
                   case concat_result == expected_result {
                     True -> concat_result
