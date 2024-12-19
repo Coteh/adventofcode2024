@@ -601,7 +601,7 @@ pub fn day07_part1_sample_test() {
     #(21_037, [9, 7, 18, 13]),
     #(292, [11, 6, 16, 20]),
   ]
-  |> list.map(day07.determine_correct_operation)
+  |> list.map(day07.determine_correct_operation(_, False))
   |> list.reduce(fn(acc, x) { acc + x })
   |> result.unwrap(0)
   |> should.equal(3749)
@@ -609,8 +609,34 @@ pub fn day07_part1_sample_test() {
 
 pub fn day07_part1_input_test() {
   read_day07_input()
-  |> list.map(day07.determine_correct_operation)
+  |> list.map(day07.determine_correct_operation(_, False))
   |> list.reduce(fn(acc, x) { acc + x })
   |> result.unwrap(0)
   |> should.equal(2_664_460_013_123)
+}
+
+pub fn day07_part2_sample_test() {
+  [
+    #(190, [10, 19]),
+    #(3267, [81, 40, 27]),
+    #(83, [17, 5]),
+    #(156, [15, 6]),
+    #(7290, [6, 8, 6, 15]),
+    #(161_011, [16, 10, 13]),
+    #(192, [17, 8, 14]),
+    #(21_037, [9, 7, 18, 13]),
+    #(292, [11, 6, 16, 20]),
+  ]
+  |> list.map(day07.determine_correct_operation(_, True))
+  |> list.reduce(fn(acc, x) { acc + x })
+  |> result.unwrap(0)
+  |> should.equal(11_387)
+}
+
+pub fn day07_part2_input_test() {
+  read_day07_input()
+  |> list.map(day07.determine_correct_operation(_, True))
+  |> list.reduce(fn(acc, x) { acc + x })
+  |> result.unwrap(0)
+  |> should.equal(426_214_131_924_213)
 }

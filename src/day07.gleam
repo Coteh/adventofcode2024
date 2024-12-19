@@ -30,19 +30,47 @@ fn iterate_operation(
   expected_result: Int,
   curr_result: Int,
   curr_list: List(Int),
+  use_concat: Bool,
 ) -> Int {
   case curr_list {
     [first, ..rest] -> {
       let add_result =
-        iterate_operation(expected_result, curr_result + first, rest)
+        iterate_operation(
+          expected_result,
+          curr_result + first,
+          rest,
+          use_concat,
+        )
       case add_result == expected_result {
         True -> add_result
         False -> {
           let mul_result =
-            iterate_operation(expected_result, curr_result * first, rest)
+            iterate_operation(
+              expected_result,
+              curr_result * first,
+              rest,
+              use_concat,
+            )
           case mul_result == expected_result {
             True -> mul_result
-            False -> 0
+            False -> {
+              case use_concat {
+                True -> {
+                  let concat_str =
+                    int.to_string(curr_result) <> int.to_string(first)
+                  let concat_result =
+                    concat_str
+                    |> int.parse
+                    |> result.unwrap(0)
+                    |> iterate_operation(expected_result, _, rest, use_concat)
+                  case concat_result == expected_result {
+                    True -> concat_result
+                    False -> 0
+                  }
+                }
+                False -> 0
+              }
+            }
           }
         }
       }
@@ -51,14 +79,26 @@ fn iterate_operation(
   }
 }
 
-pub fn determine_correct_operation(equation: #(Int, List(Int))) -> Int {
-  iterate_operation(equation.0, 0, equation.1)
+pub fn determine_correct_operation(
+  equation: #(Int, List(Int)),
+  use_concat: Bool,
+) -> Int {
+  iterate_operation(equation.0, 0, equation.1, use_concat)
 }
 
 pub fn main() {
-  read_lines([])
+  let equations = read_lines([])
+
+  equations
   //   |> io.debug
-  |> list.map(determine_correct_operation)
+  |> list.map(determine_correct_operation(_, False))
+  |> list.reduce(fn(acc, x) { acc + x })
+  |> result.unwrap(0)
+  |> io.debug
+
+  equations
+  // |> io.debug
+  |> list.map(determine_correct_operation(_, True))
   |> list.reduce(fn(acc, x) { acc + x })
   |> result.unwrap(0)
   |> io.debug
