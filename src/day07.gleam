@@ -68,8 +68,8 @@ fn iterate_operation(
                     |> float.add(1.0)
                     |> int.power(10, _)
                     |> result.unwrap(0.0)
-                    |> float.multiply(curr_result |> int.to_float)
                     |> conversion.float_to_int
+                    |> int.multiply(curr_result)
                     |> int.add(first)
                     |> iterate_operation(expected_result, _, rest, use_concat)
                   case concat_result == expected_result {
