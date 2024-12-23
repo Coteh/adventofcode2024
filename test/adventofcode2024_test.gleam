@@ -2,7 +2,9 @@ import day01
 import day02
 import day03
 import day05
+import day06
 import day07
+import gleam/dict
 import gleam/int
 import gleam/list
 import gleam/result
@@ -80,6 +82,17 @@ fn read_day05_input() -> #(List(#(Int, Int)), List(List(Int))) {
     )
 
   #(processed_rules, processed_inputs)
+}
+
+fn read_day06_input() -> day06.GuardMap {
+  case simplifile.read("input/day06/input") {
+    Ok(file) -> {
+      string.trim(file)
+      |> string.split("\n")
+    }
+    Error(_) -> []
+  }
+  |> day06.initialize_guard_map
 }
 
 fn read_day07_input() -> List(#(Int, List(Int))) {
@@ -587,6 +600,33 @@ pub fn day05_part2_input_test() {
   |> list.reduce(fn(acc, x) { acc + x })
   |> result.unwrap(0)
   |> should.equal(6732)
+}
+
+pub fn day06_part1_sample_test() {
+  day06.GuardMap(
+    [
+      day06.Obstacle(4, 0),
+      day06.Obstacle(9, 1),
+      day06.Obstacle(2, 3),
+      day06.Obstacle(7, 4),
+      day06.Obstacle(1, 6),
+      day06.Obstacle(8, 7),
+      day06.Obstacle(0, 8),
+      day06.Obstacle(6, 9),
+    ],
+    day06.Guard(4, 6, day06.Up),
+    dict.from_list([]),
+    10,
+    10,
+  )
+  |> day06.perform_guard_movement
+  |> should.equal(41)
+}
+
+pub fn day06_part1_input_test() {
+  read_day06_input()
+  |> day06.perform_guard_movement
+  |> should.equal(5199)
 }
 
 pub fn day07_part1_sample_test() {
