@@ -1,7 +1,6 @@
 import gleam/dict
 import gleam/erlang
 import gleam/io
-import gleam/iterator
 import gleam/list
 import gleam/result
 import gleam/string
