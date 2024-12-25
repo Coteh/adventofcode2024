@@ -1,5 +1,7 @@
 # adventofcode2024
 
+[![test](https://github.com/Coteh/adventofcode2024/actions/workflows/test.yml/badge.svg)](https://github.com/Coteh/adventofcode2024/actions/workflows/test.yml)
+
 Learning [Gleam](https://gleam.run/) this year.
 
 ## Instructions
